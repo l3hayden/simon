@@ -1,0 +1,65 @@
+﻿@page "/edit-service/"
+@page "/edit-service/{id:int}"
+@inject NavigationManager Navigation
+@inject IServiceService ServiceService
+@rendermode InteractiveServer
+
+<h3>Edit Service</h3>
+
+@if (isLoading)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <EditForm Model="service" OnSubmit="HandleSubmit">
+        <label>Name</label>
+        <InputText @bind-Value="service.Name"></InputText>
+
+        <label>Cost</label>
+        <InputNumber @bind-Value="service.Cost"></InputNumber>
+
+        <label>Sell</label>
+        <InputNumber @bind-Value="service.Sell"></InputNumber>
+
+        <label>Description</label>
+        <InputText @bind-Value="service.Description"></InputText>
+
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+
+    private Service service { get; set; } = new Service { Cost = 0, Sell = 0, Name = string.Empty, Description = string.Empty };
+
+    private bool isLoading = true;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        isLoading = true;
+        if (Id.HasValue)
+        {
+            // Fetch the service details based on the Id and populate the service object
+            service = await ServiceService.GetServiceById(Id.Value) ?? new Service { Cost = 0, Sell = 0, Name = string.Empty, Description = string.Empty };
+        }
+        isLoading = false;
+    }
+
+    private async Task HandleSubmit()
+    {
+        isLoading = true;
+        if (Id.HasValue)
+        {
+            await ServiceService.UpdateService(service); // Assuming you have an UpdateService method
+        }
+        else
+        {
+            await ServiceService.AddService(service);
+        }
+        isLoading = false;
+        Navigation.NavigateTo("services");
+    }
+}

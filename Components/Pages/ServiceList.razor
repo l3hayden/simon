@@ -1,0 +1,69 @@
+﻿@page "/services"
+@inject NavigationManager Navigation
+@inject IServiceService ServiceService
+@attribute [StreamRendering(true)]
+@rendermode InteractiveServer
+
+<h3>Service Catalog</h3>
+
+@if (services == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (services.Count == 0) // Check if the services list is empty
+{
+    <p>No services listed.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Service Name</th>
+                <th>Service Cost</th>
+                <th>Service Sell</th>
+                <th>Service Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var service in services)
+            {
+                <tr>
+                    <td>@service.Name</td>
+                    <td>$@service.Cost</td>
+                    <td>$@service.Sell</td>
+                    <td>@service.Description</td>
+                    <td>
+                        <a href="" @onclick="() => NavEditService(service.Id)">Edit</a>
+                        <span>/</span>
+                        <a href="" @onclick="() => NavDeleteService(service.Id)">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+<button @onclick="NavEditService" class="btn btn-primary">New Service</button>
+
+
+@code {
+    List<Service>? services = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        services = await ServiceService.GetAllServices();
+    }
+
+    private void NavEditService()
+    {
+        Navigation.NavigateTo("/edit-service/");
+    }
+    private void NavEditService(int id)
+    {
+        Navigation.NavigateTo($"/edit-service/{id}");
+    }
+    private void NavDeleteService(int id)
+    {
+        ServiceService.DeleteServiceById(id);
+    }
+}
